@@ -12,6 +12,14 @@ Zerqavon (`ZQVX`) is an independent proof-of-work network derived from Monero v0
 - GUI wallet: https://github.com/zerqavon/zerqavon-wallet-gui
 - CPU miner: https://github.com/zerqavon/miner
 
+## Downloads
+
+Verified daemon, CLI wallet and wallet RPC packages are available for Windows x64 and Ubuntu 26.04 x86-64:
+
+https://github.com/zerqavon/zerqavon-wallet-cli/releases/latest
+
+Verify downloaded packages with the `SHA256SUMS-Core.txt` file attached to the release. The broader inherited CI matrix is being rebuilt; the currently published packages were built and verified locally from this source tree.
+
 ## Included programs
 
 - `zerqavond`: full node and daemon RPC
@@ -153,4 +161,3 @@ Security-sensitive reports should not include private keys or live wallet files 
 ## License and upstream attribution
 
 See [LICENSE](LICENSE) for the applicable BSD 3-Clause terms. Zerqavon is based on upstream Monero/CryptoNote code; the original notices and contributor attribution are preserved in the relevant files.
-
