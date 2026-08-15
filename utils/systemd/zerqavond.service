@@ -1,0 +1,20 @@
+[Unit]
+Description=Zerqavon Full Node
+After=network-online.target
+
+[Service]
+User=zerqavon
+Group=zerqavon
+WorkingDirectory=~
+StateDirectory=zerqavon
+LogsDirectory=zerqavon
+
+Type=simple
+ExecStart=/usr/bin/zerqavond --config-file /etc/zerqavond.conf --non-interactive
+StandardOutput=null
+StandardError=null
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
