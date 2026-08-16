@@ -4672,19 +4672,19 @@ bool simple_wallet::init(const boost::program_options::variables_map& vm)
       CHECK_AND_ASSERT_MES(r, false, tr("account creation failed"));
       password = *r;
       welcome = true;
-      // if no block_height is specified, assume its a new account and start it "now"
+      // Zerqavon wallets scan from genesis unless a restore height is supplied.
       if (command_line::is_arg_defaulted(vm, arg_restore_height)) {
         {
           tools::scoped_message_writer wrt = tools::msg_writer();
           wrt << tr("No restore height is specified.") << " ";
-          wrt << tr("Assumed you are creating a new account, restore will be done from current estimated blockchain height.") << " ";
+          wrt << tr("The wallet will scan the Zerqavon blockchain from genesis so early payments cannot be skipped.") << " ";
           wrt << tr("Use --restore-height or --restore-date if you want to restore an already setup account from a specific height.");
         }
         std::string confirm = input_line(tr("Is this okay?"), true);
         if (std::cin.eof() || !command_line::is_yes(confirm))
           CHECK_AND_ASSERT_MES(false, false, tr("account creation aborted"));
 
-        m_wallet->set_refresh_from_block_height(m_wallet->estimate_blockchain_height() > 0 ? m_wallet->estimate_blockchain_height() - 1 : 0);
+        m_wallet->set_refresh_from_block_height(0);
         m_wallet->explicit_refresh_from_block_height(true);
         m_restore_height = m_wallet->get_refresh_from_block_height();
       }
@@ -6005,6 +6005,20 @@ bool simple_wallet::refresh_main(uint64_t start_height, enum ResetType reset, bo
     return true;
 
   LOCK_IDLE_SCOPE();
+
+  // Repair wallets created by older Zerqavon builds which inherited Monero's
+  // estimated restore height and could therefore skip the young Zerqavon chain.
+  std::string daemon_height_error;
+  const uint64_t daemon_height = m_wallet->get_daemon_blockchain_height(daemon_height_error);
+  if (daemon_height_error.empty() && m_wallet->get_refresh_from_block_height() > daemon_height)
+  {
+    message_writer(console_color_yellow, false)
+      << tr("Correcting an invalid wallet refresh height and rescanning Zerqavon from genesis.");
+    m_wallet->set_refresh_from_block_height(0);
+    m_wallet->explicit_refresh_from_block_height(true);
+    reset = ResetSoft;
+    start_height = 0;
+  }
 
   crypto::hash transfer_hash_pre{};
   uint64_t height_pre = 0, height_post;

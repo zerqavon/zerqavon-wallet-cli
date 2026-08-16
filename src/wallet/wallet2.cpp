@@ -5757,9 +5757,11 @@ crypto::secret_key wallet2::generate(const std::string& wallet_, const epee::wip
   setup_keys(password);
 
   // calculate a starting refresh height
-  if(m_refresh_from_block_height == 0 && !recover){
-    m_refresh_from_block_height = estimate_blockchain_height();
-  }
+  // Zerqavon is an independent chain. Monero's time based height estimate can
+  // be higher than the Zerqavon tip and make a new wallet skip early payments.
+  // Height zero is intentional and means scan from genesis.
+  if (m_refresh_from_block_height == 0 && !recover)
+    m_explicit_refresh_from_block_height = true;
 
   create_keys_file(wallet_, false, password, m_nettype != MAINNET || create_address_file);
 

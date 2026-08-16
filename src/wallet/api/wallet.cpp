@@ -2554,12 +2554,19 @@ bool WalletImpl::doInit(const string &daemon_address, const std::string &proxy_a
     if (!m_wallet->init(daemon_address, m_daemon_login, proxy_address, upper_transaction_size_limit))
        return false;
 
-    // in case new wallet, this will force fast-refresh (pulling hashes instead of blocks)
-    // If daemon isn't synced a calculated block height will be used instead
-    //TODO: Handle light wallet scenario where block height = 0.
-    if (isNewWallet() && daemonSynced()) {
-        LOG_PRINT_L2(__FUNCTION__ << ":New Wallet - fast refresh until " << daemonBlockChainHeight());
-        m_wallet->set_refresh_from_block_height(daemonBlockChainHeight());
+    // A new Zerqavon wallet must scan from genesis. Using the daemon's current
+    // height here makes payments in earlier blocks invisible to the wallet.
+    if (isNewWallet()) {
+        LOG_PRINT_L2(__FUNCTION__ << ": New Zerqavon wallet - refreshing from genesis");
+        m_wallet->set_refresh_from_block_height(0);
+        m_wallet->explicit_refresh_from_block_height(true);
+    }
+    else if (daemonSynced() && m_wallet->get_refresh_from_block_height() > daemonBlockChainHeight()) {
+        LOG_PRINT_L1(__FUNCTION__ << ": correcting invalid Zerqavon refresh height "
+                     << m_wallet->get_refresh_from_block_height() << " to 0");
+        m_wallet->set_refresh_from_block_height(0);
+        m_wallet->explicit_refresh_from_block_height(true);
+        m_refreshShouldRescan = true;
     }
 
     if (m_rebuildWalletCache)
