@@ -89,6 +89,11 @@ jobs:
         run: |
           ${{env.CCACHE_SETTINGS}}
           make release-static-win64 -j${{env.MAKE_JOB_COUNT}}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zerqavon-cli-windows-x64
+          path: build/**/bin/*.exe
+          if-no-files-found: error
       - name: save ccache
         uses: actions/cache/save@v5
         if: github.event_name != 'pull_request' && steps.ccache-restore.outputs.cache-hit != 'true'
@@ -213,6 +218,11 @@ jobs:
         run: |
           ${{env.CCACHE_SETTINGS}}
           ${{env.BUILD_DEFAULT_LINUX}}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zerqavon-cli-${{ matrix.container }}-x64
+          path: build/bin/zerqavon*
+          if-no-files-found: error
       - name: save ccache
         uses: actions/cache/save@v5
         if: github.event_name != 'pull_request' && steps.ccache-restore.outputs.cache-hit != 'true'

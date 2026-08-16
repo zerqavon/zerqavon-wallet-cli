@@ -48,6 +48,13 @@ message(STATUS "CMake version ${CMAKE_VERSION}")
 
 project(zerqavon)
 
+# The public Zerqavon source archive vendors dependency sources as regular
+# files rather than gitlinks. Developers can still opt into upstream submodule
+# verification with -DMANUAL_SUBMODULES=OFF.
+if(NOT DEFINED MANUAL_SUBMODULES)
+  set(MANUAL_SUBMODULES ON)
+endif()
+
 option (USE_CCACHE "Use ccache if a usable instance is found" ON)
 if (USE_CCACHE)
 	include(FindCcache) # Has to be included after the project() macro, to be able to read the CXX variable.
