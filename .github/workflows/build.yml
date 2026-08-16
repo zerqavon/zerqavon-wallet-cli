@@ -85,6 +85,11 @@ jobs:
           cache: false
           install: mingw-w64-x86_64-toolchain make mingw-w64-x86_64-cmake mingw-w64-x86_64-ccache mingw-w64-x86_64-boost mingw-w64-x86_64-openssl mingw-w64-x86_64-zeromq mingw-w64-x86_64-libsodium mingw-w64-x86_64-hidapi mingw-w64-x86_64-protobuf-c mingw-w64-x86_64-libusb mingw-w64-x86_64-unbound git
       - uses: ./.github/actions/set-make-job-count
+      - name: build static jitterentropy dependency
+        run: |
+          git clone --depth 1 --branch v3.6.3 https://github.com/smuellerDD/jitterentropy-library.git
+          make -C jitterentropy-library jitterentropy-static -j${{env.MAKE_JOB_COUNT}}
+          make -C jitterentropy-library install-static PREFIX="$MINGW_PREFIX"
       - name: build
         run: |
           ${{env.CCACHE_SETTINGS}}
