@@ -98,7 +98,7 @@ jobs:
         run: |
           rm -rf windows-package
           mkdir -p windows-package
-          cp -f build/**/bin/*.exe windows-package/
+          find build -path '*/bin/*.exe' -exec cp -f {} windows-package/ \;
           for file in windows-package/*.exe; do
             ldd "$file" | awk '/=>/ { print $3 }' | while read -r dep; do
               if [ -f "$dep" ] && [[ "$dep" == "$MINGW_PREFIX"/bin/* ]]; then
