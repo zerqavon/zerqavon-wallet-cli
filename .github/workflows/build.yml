@@ -94,10 +94,44 @@ jobs:
         run: |
           ${{env.CCACHE_SETTINGS}}
           make release-static-win64 -j${{env.MAKE_JOB_COUNT}}
+      - name: package Windows runtime
+        run: |
+          rm -rf windows-package
+          mkdir -p windows-package
+          cp -f build/**/bin/*.exe windows-package/
+          for file in windows-package/*.exe; do
+            ldd "$file" | awk '/=>/ { print $3 }' | while read -r dep; do
+              if [ -f "$dep" ] && [[ "$dep" == "$MINGW_PREFIX"/bin/* ]]; then
+                cp -f "$dep" windows-package/
+              fi
+            done
+          done
+          for dll in \
+            libgcc_s_seh-1.dll \
+            libstdc++-6.dll \
+            libwinpthread-1.dll \
+            libiconv-2.dll \
+            libicudt78.dll \
+            libicuin78.dll \
+            libicuuc78.dll \
+            libintl-8.dll \
+            libcrypto-3-x64.dll \
+            libssl-3-x64.dll \
+            libzmq.dll \
+            libsodium-26.dll \
+            libhidapi-0.dll \
+            libusb-1.0.dll \
+            libunbound-8.dll \
+            libzstd.dll \
+            zlib1.dll; do
+            if [ -f "$MINGW_PREFIX/bin/$dll" ]; then
+              cp -f "$MINGW_PREFIX/bin/$dll" windows-package/
+            fi
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: zerqavon-cli-windows-x64
-          path: build/**/bin/*.exe
+          path: windows-package
           if-no-files-found: error
       - name: save ccache
         uses: actions/cache/save@v5
