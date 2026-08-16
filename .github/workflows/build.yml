@@ -225,7 +225,7 @@ jobs:
           ${{env.BUILD_DEFAULT_LINUX}}
       - uses: actions/upload-artifact@v4
         with:
-          name: zerqavon-cli-${{ matrix.container }}-x64
+          name: zerqavon-cli-${{ matrix.name }}-x64
           path: build/bin/zerqavon*
           if-no-files-found: error
       - name: save ccache
