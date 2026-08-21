@@ -20,6 +20,15 @@ namespace blocks
 
   const epee::span<const unsigned char> GetCheckpointsData(cryptonote::network_type network)
   {
+    // Zerqavon has its own mainnet chain. The inherited Monero
+    // checkpoints.dat file contains Monero block hash-of-hashes data and must
+    // not be used for Zerqavon mainnet sync validation, otherwise nodes can
+    // reject valid Zerqavon peers with "usable is negative".
+    if (network == cryptonote::network_type::MAINNET)
+    {
+      return nullptr;
+    }
+
     const auto it = CheckpointsByNetwork.find(network);
     if (it != CheckpointsByNetwork.end())
     {
